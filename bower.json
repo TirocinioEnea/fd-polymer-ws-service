@@ -1,0 +1,7 @@
+{
+  "name": "fd-polymer-ws-service#gh-pages",
+  "private": true,
+  "dependencies": {
+    "fd-polymer-ws-service": "freedomotic/fd-polymer-ws-service#master"
+  }
+}

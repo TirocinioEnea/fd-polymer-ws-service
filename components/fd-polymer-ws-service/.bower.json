@@ -1,0 +1,14 @@
+{
+  "name": "fd-polymer-ws-service",
+  "homepage": "https://github.com/freedomotic/fd-polymer-ws-service",
+  "_release": "8abc7f86ba",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "8abc7f86ba4b75e4b1693ef492ebfee650562260"
+  },
+  "_source": "git://github.com/freedomotic/fd-polymer-ws-service.git",
+  "_target": "master",
+  "_originalSource": "freedomotic/fd-polymer-ws-service",
+  "_direct": true
+}
