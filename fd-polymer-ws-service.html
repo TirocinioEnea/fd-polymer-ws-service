@@ -1,0 +1,129 @@
+<link rel="import" href="../polymer/polymer.html"> 
+<link rel="import" href="../x-websocket/dist/x-websocket.html">
+<link rel="import" href="../fd-polymer-api-settings/fd-polymer-api-settings.html">
+
+<!--
+Element providing a service for interfacing Freedomotic's WebSocket APIs.
+
+##### Example
+
+    <fd-ws-service></fd-ws-service>
+
+@element fd-ws-service
+@blurb Element providing a service for interfacing Freedomotic's WebSocket APIs.
+@status alpha
+@homepage http://freedomotic.github.io/fd-polymer-ws-service
+-->
+<polymer-element name="fd-ws-service" attributes="wstype ssl address port apiVersion">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <fd-api-settings  ssl="{{ssl}}"
+    address="{{address}}" 
+    port="{{port}}" 
+    apiVersion="{{apiVersion}}"></fd-api-settings>
+    <x-websocket id="ws"
+      on-message="{{onMessage}}">
+    </x-websocket>
+
+  </template>
+  <script>
+    Polymer("fd-ws-service",{
+     
+     /**
+       * The 'ssl' attribute tells whether the API call requires a encrypted connection 
+       *
+       * @attribute ssl
+       * @type boolean
+       */
+      ssl: undefined,
+     
+     /**
+       * The 'address' attribute specifies the hostname or ip address of API service 
+       *
+       * @attribute address
+       * @type string
+       */
+      address: undefined,
+
+     /**
+       * The 'port' attribute specifies the tcp port of API service. 
+       * Default value 0 mean the port number is choosen from the SSL attribute, 
+       * so port will be 9111 if no SSL, and 9113 is SSL
+       * @attribute port
+       * @type int
+       */
+      port: undefined,
+
+     /**
+       * The 'apiVersion' attribute specifies the API version to use 
+       *
+       * @attribute apiVersion
+       * @type string
+       */
+      apiVersion: undefined,
+      observe: {
+        "ssl apiVersion address port ": "reloadUrl"
+      },
+
+     /**
+       * `wstype` property identifies the desired WS service [objects,zones,plugins]
+       *
+       * @property wstype
+       * @type string
+       */
+      wstype: undefined,
+      ready: function(){
+        this.reloadUrl();
+      },
+      reloadUrl: function(){
+        if(this.ssl != undefined && !!this.address && !!this.port && !!this.apiVersion){
+          this.$.ws.url = (this.ssl ? "wss" : "ws") + "://" + this.address + ":"+ this.port +"/"+ this.apiVersion +"/ws/" + this.wstype +"/";
+          //console.log("WS.url: " + this.$.ws.url);
+        }
+        
+      },
+
+      onMessage: function(event){
+        var data = event.detail.data;
+        data = data.split("|").pop();
+        if(data.trim() != ""){
+          data = {uuid: data, type: this.wstype};
+          this.fire("message", { data: data });
+        }
+        event.stopPropagation();
+      },
+
+      _parse: function(input){
+        var statements = input.substring(2, input.length -2).split("; ");
+        var output = {};
+
+        for (var i = 0; i < statements.length; i++) {
+          var statement = statements[i].split(" EQUALS ");
+          var leftSide = statement[0].split(".");
+          var rightSide = statement[1];
+          this._assign(output, leftSide, rightSide);
+        }
+
+        var data = JSON.stringify(output);
+        return JSON.parse(data);
+      },
+
+      _assign: function(obj, keyPath, value){
+         var lastKeyIndex = keyPath.length-1;
+         for (var i = 0; i < lastKeyIndex; ++i) {
+           key = keyPath[i];
+           if (!(key in obj)){
+             obj[key] = {};
+           }
+           obj = obj[key];
+         }
+         obj[keyPath[lastKeyIndex]] = value;
+      }
+
+    });
+  </script>
+</polymer-element>
