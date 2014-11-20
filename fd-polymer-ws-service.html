@@ -14,7 +14,7 @@ Element providing a service for interfacing Freedomotic's WebSocket APIs.
 @status alpha
 @homepage http://freedomotic.github.io/fd-polymer-ws-service
 -->
-<polymer-element name="fd-ws-service" attributes="wstype ssl address port apiVersion">
+<polymer-element name="fd-ws-service" attributes="wstype ssl address port apiVersion auto">
   <template>
     <style>
       :host {
@@ -25,14 +25,16 @@ Element providing a service for interfacing Freedomotic's WebSocket APIs.
     address="{{address}}" 
     port="{{port}}" 
     apiVersion="{{apiVersion}}"></fd-api-settings>
-    <x-websocket id="ws"
-      on-message="{{onMessage}}">
-    </x-websocket>
-
+    <template if="{{auto}}">
+      <x-websocket id="ws"
+        on-message="{{onMessage}}"
+        url="{{url}}">
+      </x-websocket>
+    </template>
   </template>
   <script>
     Polymer("fd-ws-service",{
-     
+      url: undefined,
      /**
        * The 'ssl' attribute tells whether the API call requires a encrypted connection 
        *
@@ -65,6 +67,15 @@ Element providing a service for interfacing Freedomotic's WebSocket APIs.
        * @type string
        */
       apiVersion: undefined,
+
+     /**
+       * The 'auto' attribute specifies whether connection should be estabilished on demand or as soon as the component is ready 
+       *
+       * @attribute auto
+       * @type boolean
+       * @default true
+       */
+      auto: true,
       observe: {
         "ssl apiVersion address port ": "reloadUrl"
       },
@@ -81,8 +92,8 @@ Element providing a service for interfacing Freedomotic's WebSocket APIs.
       },
       reloadUrl: function(){
         if(this.ssl != undefined && !!this.address && !!this.port && !!this.apiVersion){
-          this.$.ws.url = (this.ssl ? "wss" : "ws") + "://" + this.address + ":"+ this.port +"/"+ this.apiVersion +"/ws/" + this.wstype +"/";
-          //console.log("WS.url: " + this.$.ws.url);
+          this.url = (this.ssl ? "wss" : "ws") + "://" + this.address + ":"+ this.port +"/"+ this.apiVersion +"/ws/" + this.wstype +"/";
+        //  console.log("WS.url: " + this.url);
         }
         
       },
@@ -94,6 +105,9 @@ Element providing a service for interfacing Freedomotic's WebSocket APIs.
           this.fire("message", data);
         }
         event.stopPropagation();
+      },
+      go: function(){
+        this.auto=true;
       }
     });
   </script>
