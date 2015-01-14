@@ -7,13 +7,14 @@ Element providing a service for interfacing Freedomotic's WebSocket APIs.
 
 ##### Example
 
-    <fd-ws-service></fd-ws-service>
+    <fd-ws-service wstype="objectChange"></fd-ws-service>
 
 @element fd-ws-service
 @blurb Element providing a service for interfacing Freedomotic's WebSocket APIs.
 @status alpha
 @homepage http://freedomotic.github.io/fd-polymer-ws-service
 -->
+
 <polymer-element name="fd-ws-service" attributes="wstype ssl address port apiVersion auto">
   <template>
     <style>
@@ -28,6 +29,7 @@ Element providing a service for interfacing Freedomotic's WebSocket APIs.
     <template if="{{auto}}">
       <x-websocket id="ws"
         on-message="{{onMessage}}"
+        on-open="{{onOpen}}"
         url="{{url}}">
       </x-websocket>
     </template>
@@ -77,7 +79,7 @@ Element providing a service for interfacing Freedomotic's WebSocket APIs.
        */
       auto: true,
       observe: {
-        "ssl apiVersion address port ": "reloadUrl"
+        "ssl apiVersion wstype address port ": "reloadUrl"
       },
 
      /**
@@ -97,7 +99,6 @@ Element providing a service for interfacing Freedomotic's WebSocket APIs.
         }
         
       },
-
       onMessage: function(event){
         var data = event.detail.data;
         data = data.split("|").pop();
@@ -106,9 +107,16 @@ Element providing a service for interfacing Freedomotic's WebSocket APIs.
         }
         event.stopPropagation();
       },
+      onOpen: function(e){
+        this.fire("open",e);
+      },
       go: function(){
         this.auto=true;
+      },
+      send: function(data){
+        this.$.ws.send(data);
       }
+      
     });
   </script>
 </polymer-element>
